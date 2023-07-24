@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -39,15 +39,24 @@ export class NotesService {
       .select('-__v');
   }
 
-  findOne(id: string) {
+  async findOne(term: string) {
 
-    // const note = this.notes.find(item => item.id === id);
+    let note: Note;
 
-    // if( !note ) {
-    //   throw new NotFoundException(`Note with ID ${ id } not found`)
-    // }
+    note = await this.noteModel.findOne({
+      title: term,
+    });
 
-    // return note;
+    if( !note && isValidObjectId( term ) ) {
+      note = await this.noteModel.findById( term );
+    }
+
+    if(!note) {
+      throw new NotFoundException(`Note with ID ${ term } not found`);
+    }
+
+    return note;
+
   }
 
   update(id: string, updateNoteDto: UpdateNoteDto) {
@@ -75,13 +84,18 @@ export class NotesService {
 
   }
 
-  remove(id: string) {
+  async remove(id: string) {
 
-    // this.findOne( id );
+    const { deletedCount } = await this.noteModel.deleteOne({
+      _id: id,
+    })
 
-    // this.notes = this.notes.filter(note => note.id !== id );
-    
-    // return
+    // No ha eliminado ninguna nota, no hay nota con ese MongoID
+    if(deletedCount === 0) {
+      throw new NotFoundException(`Note with ID ${ id } not found`)
+    }
+
+    return;
 
   }
 

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { NotesService } from './notes.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ParseMongoIdPipe } from 'src/common/pipes/parse-mongo-id.pipe';
 
 @Controller('notes')
 export class NotesController {
@@ -17,9 +18,9 @@ export class NotesController {
     return this.notesService.findAll( paginationDto );
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe ) id: string) {
-    return this.notesService.findOne( id );
+  @Get(':term')
+  findOne(@Param('term' ) term: string) {
+    return this.notesService.findOne( term );
   }
 
   @Patch(':id')
@@ -30,7 +31,7 @@ export class NotesController {
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe ) id: string) {
+  remove(@Param('id', ParseMongoIdPipe ) id: string) {
     return this.notesService.remove( id );
   }
 }
