@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { NotesService } from './notes.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
