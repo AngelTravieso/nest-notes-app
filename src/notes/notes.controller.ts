@@ -24,7 +24,7 @@ export class NotesController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe ) id: string,
+  update(@Param('id', ParseMongoIdPipe ) id: string,
   @Body() updateNoteDto: UpdateNoteDto
   ) {
     return this.notesService.update(id, updateNoteDto);

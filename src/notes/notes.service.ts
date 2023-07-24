@@ -10,8 +10,8 @@ import { Note } from './entities/note.entity';
 export class NotesService {
 
   constructor(
-    @InjectModel(Note.name)
-    private noteModel: Model<Note>
+    @InjectModel( Note.name )
+    private readonly noteModel = Model<Note>,
   ) {}
 
 
@@ -59,32 +59,20 @@ export class NotesService {
 
   }
 
-  update(id: string, updateNoteDto: UpdateNoteDto) {
+  async update( id: string, updateNoteDto: UpdateNoteDto ) {
 
-    // let noteDB = this.findOne( id );
+    const note = await this.findOne( id );
 
-    // if( updateNoteDto.id && updateNoteDto.id !== id ) throw new BadRequestException('Note ID is not valid')
-
-    // this.notes = this.notes.map( note => {
-    //   if(note.id === id) {
-    //     noteDB = {
-    //         ...noteDB,
-    //         ...updateNoteDto,
-    //         id,
-    //       }
-
-    //       return noteDB;
-    //   }
-
-    //   return note;
-
-    // });
-
-    // return noteDB;
+    try {
+      await note.updateOne( updateNoteDto );
+      return { ...note.toJSON(), ...updateNoteDto };
+    } catch(err) {
+      this.handleExceptions( err );
+    }
 
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
 
     const { deletedCount } = await this.noteModel.deleteOne({
       _id: id,
@@ -100,7 +88,7 @@ export class NotesService {
   }
 
   // Método personalizado para escuchar todas las excepciones
-  private handleExceptions( err: any ) {
+  private handleExceptions( err: any ): void {
     // Si ya existe un documento en MongoDB con el mismo title (title=unique)
     if(err.code === 11000) {
       throw new BadRequestException(`Note con ID ${ JSON.stringify(err.keyValue) } already exist in the DB`)
