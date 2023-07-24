@@ -6,15 +6,26 @@ import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Note } from './entities/note.entity';
 
+/**
+ * Class para interactuar con las Notas
+ */
 @Injectable()
 export class NotesService {
 
   constructor(
     @InjectModel( Note.name )
+    /**
+     * @property {Model} noteModel - Modelo notas inyectado
+     */
     private readonly noteModel = Model<Note>,
   ) {}
 
 
+  /**
+   * @property {Function} create - Crear una nueva nota
+   * @param createNoteDto - Datos necesarios para crear la nota
+   * @returns { Promise<Note> } - Nota creada
+   */
   async create(createNoteDto: CreateNoteDto): Promise<Note> {
     // * 1.
     // const createdNote = new this.noteModel( createNoteDto )
@@ -29,6 +40,11 @@ export class NotesService {
     }
   }
 
+  /**
+   * @property {Function} findAll - Retornar todas las Notas
+   * @param paginationDto - QueryParams para el paginado (limit y offset)
+   * @returns {Promise<Note[]>} Array con todas las notas
+   */
   findAll( paginationDto: PaginationDto ): Promise<Note[]> {
 
     const { limit = 5, offset = 0 } = paginationDto;
@@ -39,6 +55,11 @@ export class NotesService {
       .select('-__v');
   }
 
+  /**
+   * @property {Function} findOne - Buscar notas por su ID
+   * @param {string} term - El término de búsqueda, puede ser el MongoID o el título de la nota
+   * @returns {Note} - Retornar nota encontrada por el ID
+   */
   async findOne(term: string) {
 
     let note: Note;
@@ -59,6 +80,12 @@ export class NotesService {
 
   }
 
+  /**
+   * @property {Function} update - Actualizar nota
+   * @param {string} id - MongoID de la nota a actualizar
+   * @param {updateNoteDto} updateNoteDto - Datos del DTO para actualizar la nota 
+   * @returns {Note} Nota con los datos actualizados
+   */
   async update( id: string, updateNoteDto: UpdateNoteDto ) {
 
     const note = await this.findOne( id );
@@ -87,7 +114,11 @@ export class NotesService {
 
   }
 
-  // Método personalizado para escuchar todas las excepciones
+  /**
+   * @property {Function} handleExceptions - Función para escuchar errores/excepciones interactuando con la BD
+   * @param {any} err - Excepción lanzada por la interacción con la BD
+   * @returns {void}
+   */
   private handleExceptions( err: any ): void {
     // Si ya existe un documento en MongoDB con el mismo title (title=unique)
     if(err.code === 11000) {

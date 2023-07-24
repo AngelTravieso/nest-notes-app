@@ -19,6 +19,12 @@ yarn install
 npm i -g @nestjs/cli
 ```
 
+4. Levantar Base de Datos
+```
+docker-compose up -d
+```
+
 
 ## Stack usado
 * NestJS
+* MongoDB
