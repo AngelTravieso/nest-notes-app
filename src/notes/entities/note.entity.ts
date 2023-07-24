@@ -7,20 +7,28 @@ export type NoteDocument = HydratedDocument<Note>;
 export class Note {
 
     @Prop({
+        type: String,
         required: true,
         unique: true,
     })
     title:      string;
 
     @Prop({
+        type: String,
         required: true,
     })
     body:       string;
 
-    @Prop()
+    @Prop({
+        type: String,
+        enum: ['completed', 'not-completed'],
+    })
     status?:    string;
 
-    @Prop()
+    @Prop({
+        type: String,
+        enum: ['low', 'medium', 'high'],
+    })
     urgency?:   string;
 
 }

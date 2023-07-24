@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { Note } from './entities/note.entity';
 
 @Injectable()

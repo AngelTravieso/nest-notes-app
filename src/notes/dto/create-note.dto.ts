@@ -11,10 +11,12 @@ export class CreateNoteDto {
     body: string;
 
     @IsOptional()
+    @IsString()
     @IsIn(['completed', 'not-completed'])
     status?: string;
 
     @IsOptional()
+    @IsString()
     @IsIn(['low', 'medium', 'high'])
     urgency?: string;
 
