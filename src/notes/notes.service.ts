@@ -1,79 +1,100 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 
-import { Note } from './interfaces/note.interface';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Note } from './entities/note.entity';
 
 @Injectable()
 export class NotesService {
 
-  private notes: Note[] = [];
+  constructor(
+    @InjectModel(Note.name)
+    private noteModel: Model<Note>
+  ) {}
 
-  create(createNoteDto: CreateNoteDto) {
 
-    const note: Note = {
-      id: uuid(),
-      ...createNoteDto,
+  async create(createNoteDto: CreateNoteDto): Promise<Note> {
+    // * 1.
+    // const createdNote = new this.noteModel( createNoteDto )
+    // return createdNote.save();
+
+    try {
+      // * 2.
+      const note = await this.noteModel.create( createNoteDto );
+      return note;
+    } catch(err) {
+      this.handleExceptions( err )
     }
-
-    this.notes = [ ...this.notes, note ];
-
-    return note;
-
   }
 
-  findAll( paginationDto: PaginationDto ) {
+  findAll( paginationDto: PaginationDto ): Promise<Note[]> {
 
-    const { limit = 10, offset = 0 } = paginationDto;
-    
-    return this.notes;
+    const { limit = 5, offset = 0 } = paginationDto;
 
+    return this.noteModel.find()
+      .limit(limit)
+      .skip(offset)
+      .select('-__v');
   }
 
   findOne(id: string) {
 
-    const note = this.notes.find(item => item.id === id);
+    // const note = this.notes.find(item => item.id === id);
 
-    if( !note ) {
-      throw new NotFoundException(`Note with ID ${ id } not found`)
-    }
+    // if( !note ) {
+    //   throw new NotFoundException(`Note with ID ${ id } not found`)
+    // }
 
-    return note;
+    // return note;
   }
 
   update(id: string, updateNoteDto: UpdateNoteDto) {
 
-    let noteDB = this.findOne( id );
+    // let noteDB = this.findOne( id );
 
-    if( updateNoteDto.id && updateNoteDto.id !== id ) throw new BadRequestException('Note ID is not valid')
+    // if( updateNoteDto.id && updateNoteDto.id !== id ) throw new BadRequestException('Note ID is not valid')
 
-    this.notes = this.notes.map( note => {
-      if(note.id === id) {
-        noteDB = {
-            ...noteDB,
-            ...updateNoteDto,
-            id,
-          }
+    // this.notes = this.notes.map( note => {
+    //   if(note.id === id) {
+    //     noteDB = {
+    //         ...noteDB,
+    //         ...updateNoteDto,
+    //         id,
+    //       }
 
-          return noteDB;
-      }
+    //       return noteDB;
+    //   }
 
-      return note;
+    //   return note;
 
-    });
+    // });
 
-    return noteDB;
+    // return noteDB;
 
   }
 
   remove(id: string) {
 
-    this.findOne( id );
+    // this.findOne( id );
 
-    this.notes = this.notes.filter(note => note.id !== id );
+    // this.notes = this.notes.filter(note => note.id !== id );
     
-    return
+    // return
+
+  }
+
+  // Método personalizado para escuchar todas las excepciones
+  private handleExceptions( err: any ) {
+    // Si ya existe un documento en MongoDB con el mismo title (title=unique)
+    if(err.code === 11000) {
+      throw new BadRequestException(`Note con ID ${ JSON.stringify(err.keyValue) } already exist in the DB`)
+    }
+
+    console.log(err);
+      
+    throw new InternalServerErrorException('Something is wrong, check logs');
 
   }
 }
